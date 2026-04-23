@@ -150,7 +150,7 @@ If the phrase cannot be interpreted, the endpoint returns:
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/stage-2-intelligence-query-engine.git
+   git clonehttps://github.com/LunarKhord/stage-2-intelligence-query-engine.git
    cd stage-2-intelligence-query-engine
    ```
 
