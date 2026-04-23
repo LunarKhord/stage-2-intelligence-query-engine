@@ -4,9 +4,8 @@ A high‑performance queryable intelligence engine built with Go. It provides ad
 
 ## Live API Base URL
 
-`https://your-deployed-app-url.com`
+`https://stage-2-intelligence-query-engine.vercel.app/`
 
-> Replace with your actual deployed URL (Vercel, Railway, etc.)
 
 ## Table of Contents
 
