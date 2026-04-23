@@ -1,0 +1,59 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+/main
+/stage-2-intelligence-query-engine
+
+# Dependency directories
+vendor/
+node_modules/
+
+# Go workspace files
+go.work
+go.work.sum
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Test coverage
+*.cover
+*.coverprofile
+coverage.html
+coverage.out
+
+# Logs
+*.log
+logs/
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Build output
+/dist/
+/build/
+/bin/
+/out/
+
+# Temporary files
+tmp/
+temp/
+
+# Vercel (if you want to ignore the .vercel folder)
+.vercel
