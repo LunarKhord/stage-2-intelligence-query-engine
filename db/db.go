@@ -7,10 +7,12 @@ import (
 	"log"
 	"os"
 	"stage-2-intelligence-query-engine/models"
+
 	//"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	//"golang.org/x/text/search"
 )
 
 var Pool *pgxpool.Pool
@@ -21,6 +23,9 @@ func Init() error {
     ctx := context.Background()
     connString := os.Getenv("DATABASE_URL")
 	log.Println(connString)
+    if connString == "" || len(connString) == 0 {
+        log.Fatal("Database URL missing or gone MIA!")
+    }
    
 
     config, err := pgxpool.ParseConfig(connString)
@@ -174,6 +179,86 @@ func InsertProfile(ctx context.Context, profile *models.SeedProfile) (bool, erro
     return isNew, nil
 }
 
+
+// func IsExistingUser(ctx context.Context, github_id string) (bool) {
+//     tx, err := Pool.Begin(ctx)
+//     if err != nil {
+//         fmt.Println(err)
+//         return false
+//     }
+//     defer tx.Rollback(ctx)
+
+//     searchQuery := `
+//         SELECT github_id FROM users WERE github_id = $1
+//     `
+//     row := tx.QueryRow(ctx, searchQuery)
+//     if len(row) >= 1 {}
+
+// }
+
+
+// InsertUser attempts to find a user by id.
+// If found, it populates the provided profile pointer with the database record.
+// If not found, it inserts the provided profile into the database.
+// Returns (isNewRecord bool, error).
+func InsertUser(ctx context.Context, user *models.User) (bool, error) {
+    tx, err := Pool.Begin(ctx)
+    if err != nil {
+        return false, err
+    }
+    defer tx.Rollback(ctx) // safe rollback if we fail to commit
+
+    insertQuery := `
+        INSERT INTO users (id, github_id, username, email, avatar_url, role, is_active, last_login_at, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        ON CONFLICT (github_id) DO UPDATE
+        SET username = EXCLUDED.username,
+            email    = EXCLUDED.email,
+            avatar_url = EXCLUDED.avatar_url,
+            role = EXCLUDED.role,
+            is_active = EXCLUDED.is_active,
+            last_login_at = EXCLUDED.last_login_at
+        RETURNING *
+    `
+    row := tx.QueryRow(ctx, insertQuery,
+        user.ID,
+        user.GithubID,
+        user.Username,
+        user.Email,
+        user.AvatarURL,
+        user.Role,
+        user.IsActive,
+        user.LastLoginAt,
+        user.CreatedAt,
+    )
+
+    var existingUser models.User
+    err = row.Scan(
+        &existingUser.ID,
+        &existingUser.GithubID,
+        &existingUser.Username,
+        &existingUser.Email,
+        &existingUser.AvatarURL,
+        &existingUser.Role,
+        &existingUser.IsActive,
+        &existingUser.LastLoginAt,
+        &existingUser.CreatedAt,
+    )
+    if err != nil {
+        log.Printf("Insert/conflict resolution failed for user %s: %v", user.Username, err)
+        return false, err
+    }
+
+    // compares the primary key (id) to detect new vs existing
+    isNewUser := (existingUser.ID == user.ID) // true only if inserted
+
+    // Commit the transaction 
+    if err := tx.Commit(ctx); err != nil {
+        return false, err
+    }
+
+    return isNewUser, nil
+}
 
 
 // findAndReturnProfile attempts to find a profile by id.
